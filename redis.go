@@ -60,24 +60,48 @@ func New(c Config) *Redis {
 func (r *Redis) Ping() (bool, error) {
 	c := r.pool.Get()
 	defer c.Close()
-	rep, err := c.Do("PING")
-	if err != nil || rep == nil {
-		return false, err
-	}
-	return (rep == "PONG"), nil
+	s, err := redis.String(c.Do("PING"))
+	return (s == "PONG"), err
 }
 
 // Get returns value, err by its key
 func (r *Redis) Get(key string) (interface{}, error) {
 	c := r.pool.Get()
 	defer c.Close()
-	if err := c.Err(); err != nil {
-		return nil, err
-	}
 	return c.Do("GET", key)
 }
 
 // GetString returns value, err by its key
 func (r *Redis) GetString(key string) (string, error) {
 	return redis.String(r.Get(key))
+}
+
+// HmSet sets a map[string]string by key
+func (r *Redis) HmSet(key string, val map[string]string) (interface{}, error) {
+	c := r.pool.Get()
+	defer c.Close()
+	vals := []interface{}{key}
+	for k, v := range val {
+		vals = append(vals, k, v)
+	}
+	return c.Do("HMSET", vals...)
+}
+
+// HGetAll returns a reply by key
+func (r *Redis) HGetAll(key string) (interface{}, error) {
+	c := r.pool.Get()
+	defer c.Close()
+	return c.Do("HGETALL", key)
+}
+
+// HGetAllMap returns a map[string]string by key
+func (r *Redis) HGetAllMap(key string) (map[string]string, error) {
+	return redis.StringMap(r.HGetAll(key))
+}
+
+// Del deletes by key
+func (r *Redis) Del(key string) (interface{}, error) {
+	c := r.pool.Get()
+	defer c.Close()
+	return c.Do("DEL", key)
 }
