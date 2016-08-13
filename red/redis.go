@@ -1,4 +1,4 @@
-package redops
+package red
 
 import (
 	"time"

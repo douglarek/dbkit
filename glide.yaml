@@ -1,8 +1,8 @@
-package: github.com/douglarek/redops
+package: github.com/douglarek/dbkit
 import:
 - package: github.com/garyburd/redigo
-  version: ^1.0.0
+  version: v1.0.0
   subpackages:
   - redis
 - package: github.com/imdario/mergo
-  version: ^0.2.2
+  version: 0.2.2
