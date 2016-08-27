@@ -2,6 +2,7 @@ package dbc
 
 import (
 	"fmt"
+	"io"
 	"reflect"
 	"time"
 
@@ -12,14 +13,12 @@ var _ dbr.EventReceiver = (*SimpleEventReceiver)(nil)
 
 // SimpleEventReceiver implements dbr.EventReceiver interface.
 type SimpleEventReceiver struct {
-	debugMode bool
+	Out io.Writer
 }
 
 // Event implements dbr.EventReceiver.Event.
 func (r *SimpleEventReceiver) Event(eventName string) {
-	if r.debugMode {
-		fmt.Printf("[%v]\n", eventName)
-	}
+	fmt.Fprintf(r.Out, "[%v]\n", eventName)
 }
 
 // EventKv implements dbr.EventReceiver.EventKv.
@@ -27,13 +26,13 @@ func (r *SimpleEventReceiver) EventKv(eventName string, kvs map[string]string) {
 
 // EventErr implements dbr.EventReceiver.EventErr.
 func (r *SimpleEventReceiver) EventErr(eventName string, err error) error {
-	fmt.Printf("[%v] %v\n", eventName, err)
+	fmt.Fprintf(r.Out, "[%v] %v\n", eventName, err)
 	return err
 }
 
 // EventErrKv implements dbr.EventReceiver.EventErrKv.
 func (r *SimpleEventReceiver) EventErrKv(eventName string, err error, kvs map[string]string) error {
-	fmt.Printf("[%v] |%s %v %s| %v\n", eventName, color("red"), err, color("reset"), kvs)
+	fmt.Fprintf(r.Out, "[%v] |%s %v %s| %v\n", eventName, color("red"), err, color("reset"), kvs)
 	return err
 }
 
@@ -42,19 +41,12 @@ func (r *SimpleEventReceiver) Timing(eventName string, nanoseconds int64) {}
 
 // TimingKv implements dbr.EventReceiver.TimingKv.
 func (r *SimpleEventReceiver) TimingKv(eventName string, nanoseconds int64, kvs map[string]string) {
-	if r.debugMode {
-		ns := time.Duration(nanoseconds)
-		ct, rs := color("reset"), color("reset")
-		if nanoseconds/int64(time.Millisecond) > 10 {
-			ct = color("red")
-		}
-		fmt.Printf("[%v] |%s %v %s| %v\n", eventName, ct, ns, rs, kvs)
+	ns := time.Duration(nanoseconds)
+	ct, rs := color("reset"), color("reset")
+	if nanoseconds/int64(time.Millisecond) > 10 {
+		ct = color("red")
 	}
-}
-
-// NewSimpleEventReceiver returns a SimpleEventReceiver.
-func NewSimpleEventReceiver(debugMode bool) dbr.EventReceiver {
-	return &SimpleEventReceiver{debugMode: debugMode}
+	fmt.Fprintf(r.Out, "[%v] |%s %v %s| %v\n", eventName, ct, ns, rs, kvs)
 }
 
 // New returns a new dbr session.
