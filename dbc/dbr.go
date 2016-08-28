@@ -3,50 +3,59 @@ package dbc
 import (
 	"fmt"
 	"io"
+	"os"
 	"reflect"
 	"time"
 
 	"github.com/gocraft/dbr"
 )
 
-var _ dbr.EventReceiver = (*SimpleEventReceiver)(nil)
+var _ dbr.EventReceiver = (*simpleEventReceiver)(nil)
 
 // SimpleEventReceiver implements dbr.EventReceiver interface.
-type SimpleEventReceiver struct {
-	Out io.Writer
+type simpleEventReceiver struct {
+	out io.Writer
 }
 
 // Event implements dbr.EventReceiver.Event.
-func (r *SimpleEventReceiver) Event(eventName string) {
-	fmt.Fprintf(r.Out, "[%v]\n", eventName)
+func (r *simpleEventReceiver) Event(eventName string) {
+	fmt.Fprintf(r.out, "[%v]\n", eventName)
 }
 
 // EventKv implements dbr.EventReceiver.EventKv.
-func (r *SimpleEventReceiver) EventKv(eventName string, kvs map[string]string) {}
+func (r *simpleEventReceiver) EventKv(eventName string, kvs map[string]string) {}
 
 // EventErr implements dbr.EventReceiver.EventErr.
-func (r *SimpleEventReceiver) EventErr(eventName string, err error) error {
-	fmt.Fprintf(r.Out, "[%v] %v\n", eventName, err)
+func (r *simpleEventReceiver) EventErr(eventName string, err error) error {
+	fmt.Fprintf(r.out, "[%v] %v\n", eventName, err)
 	return err
 }
 
 // EventErrKv implements dbr.EventReceiver.EventErrKv.
-func (r *SimpleEventReceiver) EventErrKv(eventName string, err error, kvs map[string]string) error {
-	fmt.Fprintf(r.Out, "[%v] |%s %v %s| %v\n", eventName, color("red"), err, color("reset"), kvs)
+func (r *simpleEventReceiver) EventErrKv(eventName string, err error, kvs map[string]string) error {
+	fmt.Fprintf(r.out, "[%v] |%s %v %s| %v\n", eventName, color("red"), err, color("reset"), kvs)
 	return err
 }
 
 // Timing implements dbr.EventReceiver.Timing.
-func (r *SimpleEventReceiver) Timing(eventName string, nanoseconds int64) {}
+func (r *simpleEventReceiver) Timing(eventName string, nanoseconds int64) {}
 
 // TimingKv implements dbr.EventReceiver.TimingKv.
-func (r *SimpleEventReceiver) TimingKv(eventName string, nanoseconds int64, kvs map[string]string) {
+func (r *simpleEventReceiver) TimingKv(eventName string, nanoseconds int64, kvs map[string]string) {
 	ns := time.Duration(nanoseconds)
 	ct, rs := color("reset"), color("reset")
 	if nanoseconds/int64(time.Millisecond) > 10 {
 		ct = color("red")
 	}
-	fmt.Fprintf(r.Out, "[%v] |%s %v %s| %v\n", eventName, ct, ns, rs, kvs)
+	fmt.Fprintf(r.out, "[%v] |%s %v %s| %v\n", eventName, ct, ns, rs, kvs)
+}
+
+// NewEventReceiver returns a new dbr EventReceiver.
+func NewEventReceiver(out ...io.Writer) dbr.EventReceiver {
+	if len(out) > 0 {
+		return &simpleEventReceiver{out: out[0]}
+	}
+	return &simpleEventReceiver{out: os.Stdout}
 }
 
 // New returns a new dbr session.
