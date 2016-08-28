@@ -58,15 +58,6 @@ func NewEventReceiver(out ...io.Writer) dbr.EventReceiver {
 	return &simpleEventReceiver{out: os.Stdout}
 }
 
-// New returns a new dbr session.
-func New(c *dbr.Connection, er ...dbr.EventReceiver) *dbr.Session {
-	er0 := (dbr.EventReceiver)(nil)
-	if len(er) > 0 {
-		er0 = er[0]
-	}
-	return c.NewSession(er0)
-}
-
 // CollectColumn returns auto mapping columns with table in dbr insert.
 func CollectColumn(table interface{}) (columns []string) {
 	v := reflect.ValueOf(table)
