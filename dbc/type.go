@@ -84,7 +84,7 @@ func (j JSONText) Value() (driver.Value, error) {
 	if err != nil {
 		return []byte{}, err
 	}
-	return []byte(j), nil
+	return string(j), nil // modified here: returns string, not bytes!
 }
 
 // Scan stores the src in *j.  No validation is done.
