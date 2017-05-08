@@ -1,0 +1,19 @@
+memo = "96162af61657b66837e0c6c25f7cf113fe4afbda45912de3132877890115a8c6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/garyburd/redigo"
+  packages = ["internal","redis"]
+  revision = "0d253a66e6e1349f4581d6d2b300ee434ee2da9f"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/gocraft/dbr"
+  packages = [".","dialect"]
+  revision = "c4f8f99b25c74a821ffa41ca2e339cc24a6b4a67"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/imdario/mergo"
+  packages = ["."]
+  revision = "d806ba8c21777d504a2090a2ca4913c750dd3a33"
